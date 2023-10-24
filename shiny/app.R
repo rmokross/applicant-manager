@@ -43,6 +43,10 @@ ui <- dashboardPage(
                         multiple = T,
                         accept = c("text/csv")),
               actionButton("uploadBtn", "Upload to Remote Server"),
+              textInput("txtField", "Check Task with GPT 3.5"),
+              textInput(inputId = "responseTextVal", label = "Verbesserungen"),
+              textInput(inputId = "responseIntVal", label = "Schwierigkeit"),
+              actionButton("sendTaskBtn", "Send"),
               actionButton("startBtn", "Start Test")
       )
     )
@@ -75,6 +79,26 @@ server <- function(input, output, session) {
         } else {
           output$uploadStatus <- renderText({ "Something scheiße wieder" })
         }
+      }
+    }
+  })
+  
+  observeEvent(input$sendTaskBtn, {
+    if (!is.null(input$txtField)) {
+      response <- POST("http://localhost:5000/improve_task", 
+                      body = list( Task = input$txtField), 
+                      encode = "json")
+      print(response)
+      if (status_code(response) == 200) {
+        parsed_response <- fromJSON(content(response, "text", encoding = "UTF-8"))
+        
+        res_verb <- parsed_response$Verbesserungspotential
+        res_schw <- parsed_response$Schwierigkeitsgrad
+        # Update Shiny UI
+        updateTextInput(session, "responseTextVal", value = res_verb)
+        updateTextInput(session, "responseIntVal", value = res_schw)
+      } else {
+        showNotification("Failed to send text!", type = "error")
       }
     }
   })

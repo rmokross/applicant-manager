@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import boto3
 import time
+from gpt_interface import *
+from prompts.task_prompt import *
 
 app = Flask(__name__)
 CORS(app)
@@ -255,6 +257,21 @@ def get_instance_ip():
         return jsonify({"Ip": instance_ip}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400    
+
+# GPT interface 
+
+@app.route('/improve_task', methods = ['POST'])
+def improve_task():
+    data = request.json
+    prompt = data.get('Task')
+    task_prompt = create_task_propmt(prompt)
+    try:
+        prompt_response = exec_prompt(task_prompt)
+        return jsonify(json.loads(prompt_response)), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+    
 
 if __name__ == '__main__':
     app.run(debug=True)

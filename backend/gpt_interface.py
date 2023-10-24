@@ -1,6 +1,9 @@
 import openai
 import json
 
+with open('../.secrets', 'r') as f:
+    openai.api_key = f.read()
+
 def create_message(prompt: str) -> list:
     messages = [{"role": "system",
                  "content": prompt}]
@@ -31,9 +34,6 @@ def get_data_from_reply(reply: str) -> json:
 
 
 if __name__=="__main__":
-
-    with open('../.secrets', 'r') as f:
-        openai.api_key = f.read()
 
     prompt1 = "Werte den Schwierigkeitsgrad der folgenden Aufgabe ein. Gib mir das Ergebnis in JSON Format zurück\
         Schreibe eine Query, mit welche alle Autos mit einem Baujahr zwischen 1965 und 1977 zurückgegeben werden. Frage die Daten von der Tabelle 'cars' ab.\
